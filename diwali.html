@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Diwali Greetings 🪔✨</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti & Tone.js -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Poppins:wght@300;400;600;700&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at center, #2a0845 0%, #1b002c 50%, #0d0015 100%);
+      color: #fff;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    .font-cinzel {
+      font-family: 'Cinzel', serif;
+    }
+
+    /* Glows & Animations */
+    .gold-glow {
+      text-shadow: 0 0 12px rgba(255, 215, 0, 0.8), 0 0 25px rgba(255, 165, 0, 0.6);
+    }
+    
+    .diya-flame {
+      transform-origin: bottom center;
+      animation: flicker 1.2s infinite alternate ease-in-out;
+    }
+
+    @keyframes flicker {
+      0% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+      50% { transform: scale(1.15) rotate(3deg); opacity: 1; filter: drop-shadow(0 0 15px #ffaa00); }
+      100% { transform: scale(0.95) rotate(-1deg); opacity: 0.85; }
+    }
+
+    .rotate-slow {
+      animation: spin 35s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .card-backdrop {
+      background: rgba(35, 10, 55, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 183, 3, 0.2);
+    }
+
+    canvas#fireworksCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between min-h-screen relative p-4 sm:p-6 select-none">
+
+  <!-- Canvas for interactive & continuous fireworks -->
+  <canvas id="fireworksCanvas"></canvas>
+
+  <!-- Sound & Music Toggle Buttons (Floating Top Right) -->
+  <div class="fixed top-4 right-4 z-50 flex gap-3">
+    <button id="soundToggle" onclick="toggleAudio()" class="bg-amber-500/20 border border-amber-400/50 hover:bg-amber-500/40 text-amber-300 p-3 rounded-full transition-all duration-300 shadow-lg flex items-center justify-center w-12 h-12" title="Toggle Festive Sound FX">
+      <i id="soundIcon" class="fas fa-volume-up text-lg"></i>
+    </button>
+  </div>
+
+  <!-- Background Decorative Rangoli Mandala -->
+  <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-15 rotate-slow z-0">
+    <svg width="600" height="600" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="#ffd700" stroke-width="1" stroke-dasharray="4,2"/>
+      <circle cx="100" cy="100" r="70" fill="none" stroke="#ff8c00" stroke-width="1.5"/>
+      <g stroke="#ff007f" stroke-width="1" fill="none">
+        <path d="M100 10 Q115 50 100 90 Q85 50 100 10 Z" />
+        <path d="M100 10 Q115 50 100 90 Q85 50 100 10 Z" transform="rotate(30 100 100)" />
+        <path d="M100 10 Q115 50 100 90 Q85 50 100 10 Z" transform="rotate(60 100 100)" />
+        <path d="M100 10 Q115 50 100 90 Q85 50 100 10 Z" transform="rotate(90 100 100)" />
+        <path d="M100 10 Q115 50 100 90 Q85 50 100 10 Z" transform="rotate(120 100 100)" />
+        <path d="M100 10 Q115 50 100 90 Q85 50 100 10 Z" transform="rotate(150 100 100)" />
+      </g>
+    </svg>
+  </div>
+
+  <!-- Top Decorative Garland Header -->
+  <header class="w-full max-w-4xl flex justify-between items-center z-20 pt-2 px-2">
+    <div class="text-amber-400 text-xs sm:text-sm tracking-widest font-cinzel">✨ SHUBH DEEPAVALI ✨</div>
+    <div class="text-amber-400 text-xs sm:text-sm tracking-widest font-cinzel">FESTIVAL OF LIGHTS 🪔</div>
+  </header>
+
+  <!-- Main Content Card -->
+  <main class="w-full max-w-2xl my-auto z-20 flex flex-col items-center">
+    
+    <!-- Central Diya Illustration -->
+    <div class="relative my-4 cursor-pointer group" onclick="triggerFireworks(event)" title="Click to Burst Fireworks!">
+      <!-- Flame -->
+      <svg class="w-16 h-24 sm:w-20 sm:h-28 mx-auto -mb-6 relative z-10 diya-flame" viewBox="0 0 100 150">
+        <defs>
+          <radialGradient id="flameGrad" cx="50%" cy="80%" r="60%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="25%" stop-color="#fff700" />
+            <stop offset="60%" stop-color="#ff6600" />
+            <stop offset="100%" stop-color="#ff0000" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <path d="M50 0 C65 40 85 70 80 110 C75 140 25 140 20 110 C15 70 35 40 50 0 Z" fill="url(#flameGrad)" />
+      </svg>
+      <!-- Base Diya -->
+      <svg class="w-44 sm:w-56 h-24 mx-auto drop-shadow-[0_10px_20px_rgba(255,165,0,0.4)]" viewBox="0 0 200 80">
+        <defs>
+          <linearGradient id="diyaBody" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#d4af37" />
+            <stop offset="50%" stop-color="#aa7c11" />
+            <stop offset="100%" stop-color="#593e00" />
+          </linearGradient>
+        </defs>
+        <!-- Diya Bowl -->
+        <path d="M10 20 Q100 90 190 20 Q170 15 100 25 Q30 15 10 20 Z" fill="url(#diyaBody)" stroke="#ffe066" stroke-width="1.5"/>
+        <!-- Golden Trim Patterns -->
+        <circle cx="100" cy="50" r="5" fill="#ff4500" />
+        <circle cx="70" cy="45" r="4" fill="#ffe066" />
+        <circle cx="130" cy="45" r="4" fill="#ffe066" />
+        <circle cx="40" cy="35" r="3" fill="#ff4500" />
+        <circle cx="160" cy="35" r="3" fill="#ff4500" />
+      </svg>
+      <div class="text-center text-xs text-amber-300/70 mt-1 animate-pulse">
+        (Tap the diya or anywhere for fireworks! 🎆)
+      </div>
+    </div>
+
+    <!-- Festive Message Container -->
+    <div class="card-backdrop w-full rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden my-4 border border-amber-400/30">
+      
+      <!-- Subtle Decorative Corner Borders -->
+      <div class="absolute top-3 left-3 text-amber-400/40 text-xl font-cinzel">🪔</div>
+      <div class="absolute top-3 right-3 text-amber-400/40 text-xl font-cinzel">🪔</div>
+      <div class="absolute bottom-3 left-3 text-amber-400/40 text-xl font-cinzel">🪔</div>
+      <div class="absolute bottom-3 right-3 text-amber-400/40 text-xl font-cinzel">🪔</div>
+
+      <h2 class="text-amber-400 font-cinzel text-lg sm:text-xl tracking-widest mb-2 uppercase">Happy Diwali</h2>
+      
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 gold-glow mb-6 leading-tight">
+        Wishing You & Your Family a Very Happy & Prosperous Diwali!
+      </h1>
+
+      <p class="text-slate-200 text-sm sm:text-base leading-relaxed max-w-lg mx-auto mb-6">
+        May the divine light of Deepavali shine brightly into your life, bringing peace, boundless joy, good health, and abundant success. ✨
+      </p>
+
+      <!-- Dynamic Sender Name Banner -->
+      <div id="senderDisplay" class="hidden my-4 p-4 rounded-xl bg-gradient-to-r from-amber-500/20 via-pink-500/20 to-purple-500/20 border border-amber-400/40 shadow-inner">
+        <span class="text-xs uppercase tracking-wider text-amber-300 block mb-1">Warmest Festive Wishes From</span>
+        <span id="senderNameText" class="text-2xl sm:text-3xl font-bold font-cinzel text-yellow-300 gold-glow"></span>
+      </div>
+
+    </div>
+
+    <!-- Interactive Personalization & Share Section -->
+    <div class="w-full card-backdrop rounded-2xl p-5 sm:p-6 text-center mt-2 border border-amber-400/30">
+      <h3 class="text-amber-300 text-sm font-semibold mb-3 flex items-center justify-center gap-2">
+        <i class="fas fa-heart"></i> Create Your Own Diwali Wish Link
+      </h3>
+      
+      <div class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        <input 
+          type="text" 
+          id="nameInput" 
+          placeholder="Enter Your Name (e.g. Rahul)" 
+          class="flex-1 bg-purple-950/80 border border-amber-400/40 rounded-xl px-4 py-3 text-white placeholder-purple-300/50 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all text-sm"
+          oninput="updatePreviewName()"
+        />
+        <button 
+          onclick="copyShareLink()" 
+          class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-amber-500/40 active:scale-95 flex items-center justify-center gap-2 text-sm"
+        >
+          <i class="fas fa-share-alt"></i> Share Wish
+        </button>
+      </div>
+
+      <!-- Copy Toast Feedback -->
+      <div id="toast" class="hidden mt-3 text-xs text-emerald-400 font-medium transition-all">
+        <i class="fas fa-check-circle"></i> Personal wish link copied to clipboard! Share it with family & friends.
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full text-center text-xs text-purple-300/60 z-20 py-4">
+    Crafted with ❤️ for Deepavali • Click anywhere to burst fireworks 🎆
+  </footer>
+
+  <script>
+    // --- State & Sound Management ---
+    let soundEnabled = false;
+    let audioSynth = null;
+
+    // Initialize Tone.js synth for crackle/sparkle sounds
+    function initAudio() {
+      if (!audioSynth) {
+        audioSynth = new Tone.PolySynth(Tone.Synth, {
+          oscillator: { type: "triangle" },
+          envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+        }).toDestination();
+        audioSynth.volume.value = -12;
+      }
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      const soundIcon = document.getElementById('soundIcon');
+      const soundBtn = document.getElementById('soundToggle');
+
+      if (soundEnabled) {
+        Tone.start();
+        initAudio();
+        soundIcon.className = "fas fa-volume-up text-lg text-amber-300";
+        soundBtn.classList.add("bg-amber-500/40", "border-amber-400");
+        playSparkleSound();
+      } else {
+        soundIcon.className = "fas fa-volume-mute text-lg text-slate-400";
+        soundBtn.classList.remove("bg-amber-500/40", "border-amber-400");
+      }
+    }
+
+    function playSparkleSound() {
+      if (!soundEnabled || !audioSynth) return;
+      try {
+        const notes = ["C5", "E5", "G5", "B5", "C6"];
+        const randomNote = notes[Math.floor(Math.random() * notes.length)];
+        audioSynth.triggerAttackRelease(randomNote, "16n");
+      } catch (e) {
+        console.log("Audio play suppressed:", e);
+      }
+    }
+
+    // --- Dynamic URL & Name Handling ---
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromName = urlParams.get('from');
+
+      if (fromName && fromName.trim() !== '') {
+        displaySenderName(decodeURIComponent(fromName));
+      }
+      
+      // Auto launch subtle welcome fireworks
+      setTimeout(() => {
+        burstConfettiCluster();
+      }, 500);
+    });
+
+    function displaySenderName(name) {
+      const container = document.getElementById('senderDisplay');
+      const textElem = document.getElementById('senderNameText');
+      textElem.innerText = name;
+      container.classList.remove('hidden');
+    }
+
+    function updatePreviewName() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (name.length > 0) {
+        displaySenderName(name);
+      } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromName = urlParams.get('from');
+        if (fromName) {
+          displaySenderName(decodeURIComponent(fromName));
+        } else {
+          document.getElementById('senderDisplay').classList.add('hidden');
+        }
+      }
+    }
+
+    function copyShareLink() {
+      const nameInput = document.getElementById('nameInput').value.trim();
+      let shareUrl = window.location.origin + window.location.pathname;
+
+      if (nameInput) {
+        shareUrl += `?from=${encodeURIComponent(nameInput)}`;
+      }
+
+      // Execute copy utilizing fallback-safe text area
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = shareUrl;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempTextArea);
+
+      // Trigger celebrate effects
+      burstConfettiCluster();
+      playSparkleSound();
+
+      // Show Toast Notification
+      const toast = document.getElementById('toast');
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 4000);
+    }
+
+    // --- Fireworks Canvas Animation ---
+    const canvas = document.getElementById('fireworksCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 6 + 1;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.alpha = 1;
+        this.decay = Math.random() * 0.02 + 0.015;
+        this.radius = Math.random() * 3 + 1;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.05; // Gravity effect
+        this.alpha -= this.decay;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(this.alpha, 0);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function createFirework(x, y) {
+      const colors = ['#ffd700', '#ff0055', '#00ffff', '#ff8c00', '#ff00ff', '#76ff03'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      for (let i = 0; i < 40; i++) {
+        particles.push(new Particle(x, y, color));
+      }
+      playSparkleSound();
+    }
+
+    function animateFireworks() {
+      ctx.fillStyle = 'rgba(13, 0, 21, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].alpha <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+      requestAnimationFrame(animateFireworks);
+    }
+    animateFireworks();
+
+    // Click handler anywhere to trigger firework burst
+    window.addEventListener('click', (e) => {
+      // Don't trigger when clicking buttons or inputs
+      if (['INPUT', 'BUTTON', 'I', 'PATH'].includes(e.target.tagName)) return;
+      triggerFireworks(e);
+    });
+
+    function triggerFireworks(e) {
+      const x = e.clientX || window.innerWidth / 2;
+      const y = e.clientY || window.innerHeight / 3;
+      createFirework(x, y);
+      burstConfettiCluster();
+    }
+
+    function burstConfettiCluster() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 50,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#ffd700', '#ff8c00', '#ff007f']
+        });
+      }
+    }
+
+    // Auto launcher for periodic random fireworks in background
+    setInterval(() => {
+      const randomX = Math.random() * window.innerWidth * 0.8 + window.innerWidth * 0.1;
+      const randomY = Math.random() * window.innerHeight * 0.5 + window.innerHeight * 0.1;
+      createFirework(randomX, randomY);
+    }, 3500);
+
+  </script>
+</body>
+</html>
